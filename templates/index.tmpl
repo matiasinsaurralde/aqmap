@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>aqmap</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ .gmapsKey }}&callback=initMap&libraries=&v=weekly"
+            defer></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style type="text/css">
+        #map {
+            height: 100%;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <script>
+        function initMap() {
+            const initialCoordinates = {lat: -25.253475, lng: -57.515440};
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 12,
+                center: initialCoordinates,
+                mapTypeId: 'hybrid'
+            });
+            var sources = {}
+
+            function updateMarker(measurement) {
+                var marker = sources[measurement.source];
+                if (marker == null) {
+                    marker = new google.maps.Marker({
+                        position: {lat: measurement.latitude, lng: measurement.longitude},
+                        map,
+                        title: measurement.source
+                    })
+                    marker.set("measurement", measurement)
+                    marker.infowindow = new google.maps.InfoWindow();
+                    marker.infowindow.setContent('<p><b>' + measurement.source + '</b><br/><b>PM10:</b>' + measurement.pm1dot0 + '<br/><b>PM20:</b> ' + measurement.pm2dot5 + '</p>');
+                    marker.infowindow.open(map, marker);
+                    sources[measurement.source] = marker
+                    return
+                }
+                marker.set("measurement", measurement)
+                marker.infowindow.setContent('<p class="animate__animated animate__flash"><b>' + measurement.source + '</b><br /><b>PM10:</b>' + measurement.pm1dot0 + '<br/><b>PM20:</b> ' + measurement.pm2dot5 + '</p>');
+            }
+
+            $.getJSON("/measurements", function (data) {
+                console.log("success", data);
+                for (i in data) {
+                    updateMarker(data[i])
+                }
+            })
+            var events = new EventSource("/stream");
+            events.onmessage = function (event) {
+                var rawJSON = atob(event.data.replaceAll('"', ''));
+                var measurement = JSON.parse(rawJSON);
+                updateMarker(measurement);
+                console.log("Updating...", measurement)
+            };
+        }
+    </script>
+</head>
+<body>
+<div id="map"></div>
+</body>
+</html>
