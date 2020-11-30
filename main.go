@@ -3,16 +3,16 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"sync"
 	"time"
-	"errors"
-	"os"
 )
 
 const (
@@ -125,6 +125,7 @@ func main() {
 		c.Data(200, "application/json", measurementsJSON)
 	})
 	router.GET("/stream", func(c *gin.Context) {
+		c.Header("X-Accel-Buffering", "no")
 		reqRedis := newRedisClient()
 		defer reqRedis.Close()
 		pubsub := rdb.Subscribe(c, topic)
@@ -151,5 +152,5 @@ func main() {
 			"gmapsKey": gmapsKey,
 		})
 	})
-	router.Run(":8080")
+	router.Run("127.0.0.1:8080")
 }
