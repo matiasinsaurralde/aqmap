@@ -33,14 +33,15 @@ var (
 )
 
 type Measurement struct {
-	Sensor    string    `json:"sensor"`
-	Source    string    `json:"source"`
-	PM1Dot0   float64   `json:"pm1dot0"`
-	PM2Dot5   float64   `json:"pm2dot5"`
-	PM10      float64   `json:"pm10"`
-	Latitude  float64   `json:"latitude"`
-	Longitude float64   `json:"longitude"`
-	Recorded  time.Time `json:"recorded"`
+	Sensor      string    `json:"sensor"`
+	Source      string    `json:"source"`
+	PM1Dot0     float64   `json:"pm1dot0"`
+	PM2Dot5     float64   `json:"pm2dot5"`
+	PM10        float64   `json:"pm10"`
+	Latitude    float64   `json:"latitude"`
+	Longitude   float64   `json:"longitude"`
+	Recorded    time.Time `json:"recorded"`
+	Description string    `json:"description"`
 }
 
 type AQIMeasurement struct {
