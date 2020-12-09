@@ -40,7 +40,7 @@
                     })
                     marker.set("measurement", measurement)
                     marker.infowindow = new google.maps.InfoWindow();
-                    marker.infowindow.setContent('<p><b>' + measurement.source + '</b><br/><b>AQI:</b> ' + measurement.quality.index + ' (' + measurement.quality.category + ')');
+                    marker.infowindow.setContent('<p><b>' + measurement.description + '</b><br/><b>AQI:</b> ' + measurement.quality.index + ' (' + measurement.quality.category + ')');
                     marker.infowindow.open(map, marker);
                     sources[measurement.source] = marker
                     return
