@@ -40,13 +40,13 @@
                     })
                     marker.set("measurement", measurement)
                     marker.infowindow = new google.maps.InfoWindow();
-                    marker.infowindow.setContent('<p><b>' + measurement.source + '</b><br/><b>PM10:</b>' + measurement.pm1dot0 + '<br/><b>PM20:</b> ' + measurement.pm2dot5 + '</p>');
+                    marker.infowindow.setContent('<p><b>' + measurement.source + '</b><br/><b>AQI:</b> ' + measurement.quality.index + ' (' + measurement.quality.category + ')');
                     marker.infowindow.open(map, marker);
                     sources[measurement.source] = marker
                     return
                 }
                 marker.set("measurement", measurement)
-                marker.infowindow.setContent('<p class="animate__animated animate__flash"><b>' + measurement.source + '</b><br /><b>PM10:</b>' + measurement.pm1dot0 + '<br/><b>PM20:</b> ' + measurement.pm2dot5 + '</p>');
+                marker.infowindow.setContent('<p class="animate__animated animate__flash"><b>' + measurement.source + '</b><br /><b>AQI:</b> ' + measurement.quality.index + ' (' + measurement.quality.category + ')');
             }
 
             $.getJSON("/measurements", function (data) {

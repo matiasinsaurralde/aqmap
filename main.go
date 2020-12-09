@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	measurementsURL = "https://rald-dev.greenbeep.com/api/v1/measurements"
+	measurementsURL = "https://rald-dev.greenbeep.com/api/v1/aqi"
 	topic           = "measurements"
 	defaultGmapsKey = "xyz"
 
@@ -26,7 +26,7 @@ const (
 )
 
 var (
-	measurementCache = make(map[string]Measurement)
+	measurementCache = make(map[string]AQIMeasurement)
 	rdb              *redis.Client
 	gmapsKey         string
 	rwMU             = sync.RWMutex{}
@@ -41,6 +41,18 @@ type Measurement struct {
 	Latitude  float64   `json:"latitude"`
 	Longitude float64   `json:"longitude"`
 	Recorded  time.Time `json:"recorded"`
+}
+
+type AQIMeasurement struct {
+	Sensor      string `json:"sensor"`
+	Source      string `json:"source"`
+	Description string `json:"description"`
+	Quality     struct {
+		Category string `json:"category"`
+		Index    int64  `json:"index"`
+	} `json:"quality"`
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
 }
 
 func init() {
@@ -72,7 +84,7 @@ func fetchMeasurements() error {
 	if err != nil {
 		return err
 	}
-	var measurements []Measurement
+	var measurements []AQIMeasurement
 	err = json.Unmarshal(body, &measurements)
 	if err != nil {
 		return err
@@ -86,15 +98,13 @@ func fetchMeasurements() error {
 			measurementCache[v.Source] = v
 			continue
 		}
-		if v.Recorded.Equal(measurement.Recorded) || v.Recorded.Before(measurement.Recorded) {
+		if v.Quality.Index == measurement.Quality.Index {
 			continue
 		}
-		if v.Recorded.After(measurement.Recorded) {
-			fmt.Printf("New data for source '%s'\n", v.Source)
-			measurementCache[v.Source] = v
-			measurementJSON, _ := json.Marshal(&v)
-			rdb.Publish(context.Background(), topic, string(measurementJSON))
-		}
+		fmt.Printf("New data for source '%s'\n", v.Source)
+		measurementCache[v.Source] = v
+		measurementJSON, _ := json.Marshal(&v)
+		rdb.Publish(context.Background(), topic, string(measurementJSON))
 	}
 	return nil
 }
